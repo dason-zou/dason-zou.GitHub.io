@@ -1,0 +1,376 @@
+name: "Nikki Mix for iPhone Stash"
+desc: |-
+  Based on Nikki mixed configuration.
+  iPhone/Stash optimized version: keeps DNS, rule-providers, proxy-groups and rules;
+  removes TUN/geox-url/process options that are unnecessary or fragile on iOS.
+author: "Dason"
+date: "2026-05-29"
+
+mode: rule
+log-level: info
+ipv6: false
+unified-delay: true
+
+# =========================
+# DNS
+# =========================
+dns:
+  enable: true
+  ipv6: false
+
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter-mode: blacklist
+
+  prefer-h3: false
+  respect-rules: true
+  use-hosts: true
+  use-system-hosts: false
+
+  # iPhone 稳定/省电优先：国内解析使用传统 UDP DNS；海外 fallback 走代理。
+  default-nameserver: #!replace
+    - 223.5.5.5
+    - 119.29.29.29
+
+  proxy-server-nameserver: #!replace
+    - 223.5.5.5
+    - 119.29.29.29
+
+  nameserver: #!replace
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+
+  fallback: #!replace
+    - https://dns.google/dns-query#选择代理
+    - https://cloudflare-dns.com/dns-query#选择代理
+
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    geosite:
+      - geolocation-!cn
+    ipcidr:
+      - 0.0.0.0/8
+      - 10.0.0.0/8
+      - 100.64.0.0/10
+      - 127.0.0.0/8
+      - 169.254.0.0/16
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+      - 224.0.0.0/4
+      - 240.0.0.0/4
+
+  nameserver-policy:
+    "geosite:cn":
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+    "geosite:apple":
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+    "geosite:microsoft":
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+    "geosite:private":
+      - system
+
+  fake-ip-filter: #!replace
+    - "*.lan"
+    - "*.local"
+    - "*.home.arpa"
+    - localhost
+    - "localhost.*"
+    - dns.msftncsi.com
+    - www.msftncsi.com
+    - www.msftconnecttest.com
+    - "*.msftconnecttest.com"
+    - "*.msftncsi.com"
+    - "time.*.com"
+    - "time.*.gov"
+    - "time.*.edu.cn"
+    - "time.*.apple.com"
+    - "ntp.*.com"
+    - pool.ntp.org
+    - "*.pool.ntp.org"
+
+# =========================
+# Sniffer
+# =========================
+sniffer:
+  enable: true
+  parse-pure-ip: false
+  force-dns-mapping: true
+  override-destination: false
+  sniff:
+    TLS:
+      ports:
+        - 443
+        - 8443
+    HTTP:
+      ports:
+        - 80
+        - 8080-8880
+
+# =========================
+# Rule Providers
+# =========================
+rule-providers: #!replace
+  SogouInput:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    url: https://ruleset.skk.moe/Clash/non_ip/sogouinput.txt
+    path: ./ruleset/SogouInput.txt
+
+  TikTok:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    url: https://cdn.jsdelivr.net/gh/powerfullz/override-rules@master/ruleset/TikTok.list
+    path: ./ruleset/TikTok.list
+
+  EHentai:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    url: https://cdn.jsdelivr.net/gh/powerfullz/override-rules@master/ruleset/EHentai.list
+    path: ./ruleset/EHentai.list
+
+  SteamFix:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    url: https://cdn.jsdelivr.net/gh/powerfullz/override-rules@master/ruleset/SteamFix.list
+    path: ./ruleset/SteamFix.list
+
+  GoogleFCM:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    url: https://cdn.jsdelivr.net/gh/powerfullz/override-rules@master/ruleset/FirebaseCloudMessaging.list
+    path: ./ruleset/GoogleFCM.list
+
+  Crypto:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    url: https://cdn.jsdelivr.net/gh/powerfullz/override-rules@master/ruleset/Crypto.list
+    path: ./ruleset/Crypto.list
+
+  Weibo:
+    type: http
+    behavior: classical
+    format: text
+    interval: 86400
+    url: https://cdn.jsdelivr.net/gh/powerfullz/override-rules@master/ruleset/Weibo.list
+    path: ./ruleset/Weibo.list
+
+# =========================
+# Proxy Groups
+# =========================
+proxy-groups: #!replace
+  - name: 选择代理
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Proxy.png
+    type: select
+    proxies: [香港节点, 台湾节点, 新加坡节点, 日本节点, 美国节点, 低倍率节点, 手动选择, 直连]
+
+  - name: 手动选择
+    icon: https://cdn.jsdelivr.net/gh/shindgewongxj/WHATSINStash@master/icon/select.png
+    type: select
+    include-all: true
+
+  - name: 未知流量
+    icon: https://cdn.jsdelivr.net/gh/shindgewongxj/WHATSINStash@master/icon/select.png
+    type: select
+    proxies: [选择代理, 直连]
+
+  - name: 海外网页服务
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Global.png
+    type: select
+    proxies: [选择代理, 香港节点, 台湾节点, 新加坡节点, 日本节点, 美国节点, 低倍率节点, 手动选择, 直连]
+
+  - name: 海外媒体
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Streaming.png
+    type: select
+    proxies: [选择代理, 香港节点, 台湾节点, 新加坡节点, 日本节点, 美国节点, 低倍率节点, 手动选择, 直连]
+
+  - name: Telegram
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram_X.png
+    type: select
+    proxies: [选择代理, 香港节点, 新加坡节点, 日本节点, 美国节点, 手动选择, 直连]
+
+  - name: AI服务
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png
+    type: select
+    proxies: [选择代理, 香港节点, 台湾节点, 新加坡节点, 日本节点, 美国节点, 低倍率节点, 手动选择, 直连]
+
+  - name: Apple
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Apple.png
+    type: select
+    proxies: [直连, 选择代理, 香港节点, 台湾节点, 新加坡节点, 日本节点, 美国节点, 低倍率节点, 手动选择]
+
+  - name: Microsoft
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Windows.png
+    type: select
+    proxies: [直连, 选择代理, 香港节点, 台湾节点, 新加坡节点, 日本节点, 美国节点, 低倍率节点, 手动选择]
+
+  - name: 直连
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Direct.png
+    type: select
+    proxies: [DIRECT]
+
+  - name: 低倍率节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Available.png
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 1200
+    tolerance: 100
+    include-all: true
+    filter: (?i)(0\.[0-5]\s*[x倍]?|低倍率|低倍|省流|省流量|实验性)
+
+  - name: 香港节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hong_Kong.png
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 1200
+    tolerance: 100
+    include-all: true
+    filter: (?i)(香港|港|HK|Hong Kong|HongKong|HKG|🇭🇰)
+
+  - name: 台湾节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Taiwan.png
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 1200
+    tolerance: 100
+    include-all: true
+    filter: (?i)(台湾|台|TW|Taiwan|TWN|TPE|🇹🇼)
+
+  - name: 新加坡节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 1200
+    tolerance: 100
+    include-all: true
+    filter: (?i)(新加坡|坡|狮城|SG|Singapore|SIN|🇸🇬)
+
+  - name: 日本节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Japan.png
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 1200
+    tolerance: 100
+    include-all: true
+    filter: (?i)(日本|东京|大阪|JP|Japan|JPN|NRT|HND|KIX|TYO|OSA|🇯🇵)
+
+  - name: 美国节点
+    icon: https://cdn.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 1200
+    tolerance: 100
+    include-all: true
+    filter: (?i)(美国|美|US|United States|UnitedStates|USA|America|LAX|SFO|SEA|NYC|JFK|DFW|SJC|🇺🇸)
+
+# =========================
+# Rules
+# =========================
+rules: #!replace
+  # 0. 常见误伤白名单
+  - DOMAIN,miniapp.bilibili.com,直连
+
+  # 1. 私有地址与局域网
+  - GEOSITE,private,直连
+  - GEOIP,private,直连,no-resolve
+
+  # 2. 明确直连的特殊服务
+  - RULE-SET,SogouInput,直连
+  - RULE-SET,SteamFix,直连
+  - RULE-SET,GoogleFCM,直连
+  - RULE-SET,Weibo,直连
+
+  # 3. AI 服务
+  - GEOSITE,category-ai-!cn,AI服务
+
+  # 4. 手动指定的海外网页入口
+  # 只代理网页入口，避免误伤 Apple TV / OneDrive 的视频、文件、CDN 资源
+  - DOMAIN,tv.apple.com,海外网页服务
+  - DOMAIN,onedrive.live.com,海外网页服务
+
+  # 5. GitHub / Apple / Microsoft
+  - GEOSITE,github,选择代理
+  - DOMAIN-SUFFIX,github.com,选择代理
+  - DOMAIN-SUFFIX,githubassets.com,选择代理
+  - DOMAIN-SUFFIX,githubusercontent.com,选择代理
+  - DOMAIN-SUFFIX,github.io,选择代理
+
+  - GEOSITE,apple@cn,直连
+  - GEOSITE,microsoft@cn,直连
+  - GEOSITE,apple,Apple
+  - GEOSITE,microsoft,Microsoft
+
+  # 6. 社交媒体
+  - DOMAIN-SUFFIX,truthsocial.com,选择代理
+  - GEOSITE,twitter,选择代理
+
+  # 7. 海外媒体
+  - RULE-SET,TikTok,海外媒体
+  - DOMAIN-SUFFIX,reddit.com,海外媒体
+  - DOMAIN-SUFFIX,redd.it,海外媒体
+  - DOMAIN-SUFFIX,redditmedia.com,海外媒体
+  - DOMAIN-SUFFIX,redditstatic.com,海外媒体
+  - DOMAIN-SUFFIX,v.redd.it,海外媒体
+  - DOMAIN-SUFFIX,i.redd.it,海外媒体
+  - DOMAIN-SUFFIX,preview.redd.it,海外媒体
+  - DOMAIN-SUFFIX,googlevideo.com,海外媒体
+  - DOMAIN-SUFFIX,ytimg.com,海外媒体
+  - DOMAIN-SUFFIX,ggpht.com,海外媒体
+  - GEOSITE,youtube,海外媒体
+  - GEOSITE,netflix,海外媒体
+  - GEOSITE,spotify,海外媒体
+  - GEOSITE,bahamut,海外媒体
+  - GEOIP,netflix,海外媒体,no-resolve
+
+  # 8. Telegram
+  - GEOSITE,telegram,Telegram
+  - GEOIP,telegram,Telegram,no-resolve
+
+  # 9. 需要代理的独立服务
+  - RULE-SET,Crypto,选择代理
+  - RULE-SET,EHentai,选择代理
+  - GEOSITE,github,选择代理
+  - GEOSITE,google-play@cn,直连
+  - GEOSITE,google,选择代理
+  - GEOSITE,pikpak,选择代理
+
+  # 10. 明确海外静态资源
+  - DOMAIN-SUFFIX,twimg.com,选择代理
+  - DOMAIN-SUFFIX,t.co,选择代理
+  - DOMAIN-SUFFIX,video.twimg.com,选择代理
+  - DOMAIN-SUFFIX,gstatic.com,选择代理
+  - DOMAIN-SUFFIX,googleusercontent.com,选择代理
+  - DOMAIN-SUFFIX,googleapis.com,选择代理
+  - DOMAIN-SUFFIX,githubassets.com,选择代理
+  - DOMAIN-SUFFIX,githubusercontent.com,选择代理
+  - DOMAIN-SUFFIX,github.io,选择代理
+
+  # 11. 国内服务与国内 IP
+  - GEOSITE,bilibili,直连
+  - GEOSITE,cn,直连
+  - GEOIP,CN,直连,no-resolve
+
+  # 12. 常规海外兜底
+  - GEOSITE,gfw,选择代理
+  - GEOSITE,geolocation-!cn,选择代理
+
+  # 13. 端口规则
+  - DST-PORT,22,选择代理
+
+  # 14. 最终兜底
+  - MATCH,未知流量
