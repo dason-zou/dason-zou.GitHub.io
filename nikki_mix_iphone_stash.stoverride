@@ -65,8 +65,6 @@ dns:
     "geosite:apple": https://dns.alidns.com/dns-query
     "geosite:microsoft": https://dns.alidns.com/dns-query
     "geosite:private": system
-    "geosite:private":
-      - system
 
   fake-ip-filter: #!replace
     - "*.lan"
