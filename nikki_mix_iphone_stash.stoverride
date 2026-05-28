@@ -61,15 +61,10 @@ dns:
       - 240.0.0.0/4
 
   nameserver-policy:
-    "geosite:cn":
-      - https://dns.alidns.com/dns-query
-      - https://doh.pub/dns-query
-    "geosite:apple":
-      - https://dns.alidns.com/dns-query
-      - https://doh.pub/dns-query
-    "geosite:microsoft":
-      - https://dns.alidns.com/dns-query
-      - https://doh.pub/dns-query
+    "geosite:cn": https://dns.alidns.com/dns-query
+    "geosite:apple": https://dns.alidns.com/dns-query
+    "geosite:microsoft": https://dns.alidns.com/dns-query
+    "geosite:private": system
     "geosite:private":
       - system
 
